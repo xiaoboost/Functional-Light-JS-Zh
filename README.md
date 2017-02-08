@@ -67,12 +67,11 @@
 
 ## 一对一培训
 本书的内容主要来源于我义同名的名义进行的专业教授（公共和私人以及公司研讨会）的培训研讨会。  
-如果您喜欢这个内容，并希望就此或者其他个各种JS/HTML/Node.js的主题培训，请通过以下渠道和我们联系：
-
+如果您喜欢这个内容，并希望就此或者其他各种JS/HTML/Node.js的主题进行培训，请通过以下渠道和我们联系：
 [http://getify.me](http://getify.me)
 
 ## 在线视频培训
-我还有几个JS的视频培训课程，我会在[Frontend Masters](https://FrontendMasters.com)授课，比如[Functional-Lite JS](https://frontendmasters.com/courses/functional-js-lite/)。还有些课程你会在[PluralSight](https://www.pluralsight.com/search?q=kyle%20simpson&categories=all)看到。
+我还有几个JS的视频培训课程，我会在[Frontend Masters](https://FrontendMasters.com)授课，比如[Functional-Lite JS](https://frontendmasters.com/courses/functional-js-lite/)。还有些课程你可以在[PluralSight](https://www.pluralsight.com/search?q=kyle%20simpson&categories=all)观看。
 
 ## Contributions
 您对此工作的任何贡献**当然非常感谢**。  
