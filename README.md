@@ -56,7 +56,7 @@
 * [Chapter 11: Putting It All together](https://github.com/getify/Functional-Light-JS/blob/master/ch11.md)
 * [Appendix A: Transducing](https://github.com/getify/Functional-Light-JS/blob/master/apA.md)
 * [Appendix B: The Humble Monad](https://github.com/getify/Functional-Light-JS/blob/master/apB.md)
-* Appendix C: FP Libraries
+* [Appendix C: FP Libraries](https://github.com/getify/Functional-Light-JS/blob/master/apC.md)
 
 ## 出版
 
