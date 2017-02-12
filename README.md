@@ -66,7 +66,7 @@
 <a href="https://www.patreon.com/getify">[![patreon.png](https://s11.postimg.org/axpzguh77/patreon.png)](https://www.patreon.com/getify)</a>
 
 ## 一对一培训
-　　本书的内容主要来源于我义同名的名义进行的专业教授（公共和私人以及公司研讨会）的培训研讨会。  
+　　本书的内容主要来源于我以同名的名义进行的专业教授（公共和私人以及公司研讨会）的培训研讨会。  
 　　如果您喜欢这个内容，并希望就此或者其他各种JS/HTML/Node.js的主题进行培训，请通过以下渠道和我们联系：
 [http://getify.me](http://getify.me)
 
