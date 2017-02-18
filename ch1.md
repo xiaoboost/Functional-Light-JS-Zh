@@ -92,3 +92,60 @@ YAGNI原则就是说：不管是多么反直觉的情况，我们应当推迟某
 由于它只适用于函数式变成，我想要在这里提醒各位读者：在本书中你将会看到很多有趣和引人注目的设计模式，但是着仅仅只是这些设计模式的非常奇特的应用而已，给出的这些代码很可能并不一定是适当的。
 
 在很多情况下你可以使用函数式编程，但并不意味着你必须使用函数式编程。这也是我同许多科班出身的函数式程序员们不同的地方。此外，我们有很多种方法来分割问题，即便您可能已经学习了一种更为复杂的方法，还具有着“面向未来”的可维护性和可扩展性，与此相比，更为简单的函数式编程模式在这一点上是足够优秀的。
+
+一般来说，我建议你在编写的代码的时候平衡一点更好，并且在你接受函数式编程的概念之后仍然适当的保守一点。Default to the YAGNI principle in deciding if a certain pattern or abstraction will help that part of the code be more readable or if it's just introducing more clever sophistication that isn't (yet) warranted.
+
+> 记住，任何从未使用过的扩展点不仅仅是在浪费你的努力，它也同样在阻挡着你前进。
+
+> Jeremy D. Miller @jeremydmiller 2/20/15
+> https://twitter.com/jeremydmiller/status/568797862441586688
+
+记住，你所写下的每一行代码都连带着读者的阅读成本。那个读者可能是另一个团队的成员，甚至是未来的你自己。无论
+
+最好的代码是即便在未来也拥有着极高的可行性的代码，因为它准确的处在它到底能/应该是什么（理想）以及它必须是什么（实用主义）之间的平衡点之上。
+
+## 资源
+
+我在写这篇文章的时候已经参考了很多不同的资源，我相信你也可以从他们之中受益，所以我想花点时间将它们指出来。
+
+### 书
+
+一些JavaScript函数式编程的书籍，你一定要去读读看：
+
+* [Professor Frisby's Mostly Adequate Guide to Functional Programming](https://drboolean.gitbooks.io/mostly-adequate-guide/content/ch1.html) by [Brian Lonsdorf](https://twitter.com/drboolean)
+* [JavaScript Allongé](https://leanpub.com/javascript-allonge) by [Reg Braithwaite](https://twitter.com/raganwald)
+* [Functional JavaScript](http://shop.oreilly.com/product/0636920028857.do) by [Michael Fogus](https://twitter.com/fogus)
+
+### 博客/网站
+
+你可以参考看看的其他作者和文章：
+
+* [Fun Fun Function Videos](https://www.youtube.com/watch?v=BMUiFMZr7vk) by [Mattias P Johansson](https://twitter.com/mpjme)
+* [Awesome FP JS](https://github.com/stoeffel/awesome-fp-js)
+* [Kris Jenkins](http://blog.jenkster.com/2015/12/what-is-functional-programming.html)
+* [Eric Elliott](https://medium.com/@_ericelliott)
+* [James A Forbes](https://james-forbes.com/)
+* [James Longster](https://github.com/jlongster)
+* [André Staltz](http://staltz.com/)
+* [Functional Programming Jargon](https://github.com/hemanth/functional-programming-jargon#functional-programming-jargon)
+* [Functional Programming Exercises](https://github.com/InceptionCode/Functional-Programming-Exercises)
+
+## 库
+
+本书中的所有代码片段都不会使用库，对于我们发现的每个操作，我们都会演示如何在独立、纯粹的JavaScript中实现他。然而，当你开始使用函数式构建更多真正的代码的时候，你很快就会想要一个库，来提供这些实用程序的更为优化更为可靠的版本。
+
+顺便说一下，你需要确实地检查库的函数库文档，以确保你知道它们是如何工作的。在其中许多代码之中，我们将会有很多相似之处，但是毫无疑问的，即使是在流行的库中，也是有些差异的。
+
+这里有些流行的JavaScript的函数式编程的库，这是你开启伟大征途的地方：
+
+* [Ramda](http://ramdajs.com)
+* [lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide)
+* [functional.js](http://functionaljs.com/)
+* [Immutable.js](https://github.com/facebook/immutable-js)
+
+在附录C中，你将会看到一些这些库的使用说明。
+
+
+## 总结
+
+这就是JavaScript轻量级函数式编程。我们的目标是学习如何与代码沟通，而并不是被术语和符号所压倒。我希望这本书能够开启你的旅程！
