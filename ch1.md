@@ -136,14 +136,14 @@ YAGNI原则就是说：不管是多么反直觉的情况，我们应当推迟某
 
 顺便说一下，你需要确实地检查库的函数库文档，以确保你知道它们是如何工作的。在其中许多代码之中，我们将会有很多相似之处，但是毫无疑问的，即使是在流行的库中，也是有些差异的。
 
-这里有些流行的JavaScript的函数式编程的库，这是你开启伟大征途的地方：
+这里有些流行的JavaScript函数式库，这是你开启伟大征途的地方：
 
 * [Ramda](http://ramdajs.com)
 * [lodash/fp](https://github.com/lodash/lodash/wiki/FP-Guide)
 * [functional.js](http://functionaljs.com/)
 * [Immutable.js](https://github.com/facebook/immutable-js)
 
-在附录C中，你将会看到一些这些库的使用说明。
+在附录C中，你将会看到这些库的简单使用说明。
 
 
 ## 总结
