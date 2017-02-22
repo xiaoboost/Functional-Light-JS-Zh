@@ -20,7 +20,7 @@
 
 你还记得你在学校里学习的有关`f(x)`的相关知识吗？等式`y = f(x)`在描述什么？
 
-我们像这样定义了一个等式：<code>f(x) = 2x<sup>2<sup> + 3<code>，它的意义是什么？绘制该方程是什么意思？这里就是它的图像：
+我们像这样定义了一个等式：<code>f(x) = 2x<sup>2</sup> + 3</code>，它的意义是什么？绘制该方程是什么意思？这里就是它的图像：
 
 <img src="https://github.com/getify/Functional-Light-JS/blob/master/fig1.png">
 
