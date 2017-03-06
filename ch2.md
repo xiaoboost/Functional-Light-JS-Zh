@@ -380,3 +380,63 @@ function foo() {
 var [ x, y ] = foo();
 console.log( x + y );           // 42
 ```
+将多个值收集到数组（或者对象）中，把它们当作返回值返回，然后将这些值进行解构赋值，这是一种透明地表达函数多个输出的方式。
+
+Tip：I'd be remiss if I didn't suggest you take a moment to consider if a function needing multiple outputs could be refactored to avoid that, perhaps separated into two or more smaller single-purpose functions? Sometimes that will be possible, sometimes not; but you should at least consider it.
+
+### 提前返回
+
+`return`语句并不只是从函数返回一个值的语句，它也可以当作是个流控制结构；函数将会在这里停止运行。因此当一个拥有多个`return`语句时，这也意味着这个函数拥有多个可能的出口，也意味着假如一个函数拥有多个输出路径，那么要理解函数的输出行为将会更加困难。
+
+比如：
+```JavaScript
+function foo(x) {
+    if (x > 10) return x + 1;
+
+    var y = x / 2;
+
+    if (y > 3) {
+        if (x % 2 == 0) return x;
+    }
+
+    if (y > 1) return y;
+
+    return x;
+}
+```
+小测验：不要在浏览器中运行代码来作弊哟，请直接回答以下问题，`foo(2)`的返回值是多少？`foo(4)`呢？还有`foo(8)`以及`foo(12)`，以上函数调用的输出分别是多少？
+
+你对你的答案有多少信心？你思考了多长时间呢？I got it wrong the first two times I tried to think it through, and I wrote it!
+
+我认为这里在可读性方面的主要问题是在于，`return`不仅仅是返回了不同的值，还被当作了流控制的语句，用以在某种情况下提前退出函数。很明显，这里有更好的方式来进行流控制（`if`逻辑等），但是我认为也有办法让输出路径更加明显。
+
+Note：这里的答案是`2`、`2`、`8`以及`13`。
+
+思考下面这个版本的代码：
+```JavaScript
+function foo(x) {
+    var retValue;
+
+    if (retValue == undefined && x > 10) {
+        retValue = x + 1;
+    }
+
+    var y = x / 2;
+
+    if (y > 3) {
+        if (retValue == undefined && x % 2 == 0) {
+            retValue = x;
+        }
+    }
+
+    if (retValue == undefined && y > 1) {
+        retValue = y;
+    }
+
+    if (retValue == undefined) {
+        retValue = x;
+    }
+
+    return retValue;
+}
+```
