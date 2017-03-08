@@ -562,4 +562,42 @@ foo();                  // Hello!
 
 ### 保持作用域
 
-在所有的编程范式，特别是函数式之中，当函数在另一个函数的作用域内时，它是如何工作的。当内部函数引用来自外部函数的变量时，这就被称为闭包。
+在所有的编程范式，特别是函数式之中，有一个非常强大的东西，那就是当函数在另一个函数的作用域内时，此时函数的行为是怎样的。内部的函数引用来自外部函数的变量，这一行为就被称为闭包。
+
+从编程的角度来说，闭包就是函数能够记住且访问到在它自己作用域外部的变量的行为，甚至该函数是在别的作用域中运行的时候。
+
+思考：
+```JavaScript
+function foo(msg) {
+    var fn = function inner(){
+        console.log( msg );
+    };
+
+    return fn;
+}
+
+var helloFn = foo( "Hello!" );
+
+helloFn();              // Hello!
+```
+
+在作用域`foo(..)`中的形参变量`msg`，它被内部的函数引用了。当`foo(..)`函数运行的时候，内部的函数就会被创建，此时这个内部生成的函数捕获了对变量`msg`的访问，并且在`return`之后仍然保持着这个访问。
+
+一旦我们得到了`helloFn`，对函数`foo(..)`的引用已经完成，它的作用域应该已经消失了才对，当然这也就意味着变量`msg`也将会随之消失。但是并不会发生这种事情，因为内部函数有一个闭包覆盖变量`msg`，从而保持了这个变量的存在。只要这个内部函数存在（现在它被在不同作用域的`helloFn`所引用），那变量`msg`也会随之存在。
+
+我们来看看更多的关于闭包操作的例子：
+```JavaScript
+function person(id) {
+    var randNumber = Math.random();
+
+    return function identify(){
+        console.log( "I am " + id + ": " + randNumber );
+    };
+}
+
+var fred = person( "Fred" );
+var susan = person( "Susan" );
+
+fred();                 // I am Fred: 0.8331252801601532
+susan();                // I am Susan: 0.3940753308893741
+```
