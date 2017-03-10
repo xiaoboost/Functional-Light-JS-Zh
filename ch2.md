@@ -601,3 +601,73 @@ var susan = person( "Susan" );
 fred();                 // I am Fred: 0.8331252801601532
 susan();                // I am Susan: 0.3940753308893741
 ```
+
+内部函数`identify()`的闭包包含了两个变量，分别是形参`id`和内部变量`randNumber`。
+
+闭包允许的访问不仅限于读取变量的原始值——它不仅仅是变量的快照，而更像是活动链接。你能够更新这个值，当前状态将会保持这个值，直到你下次访问它。
+
+```JavaScript
+function runningCounter(start) {
+    var val = start;
+
+    return function current(increment = 1){
+        val = val + increment;
+        return val;
+    };
+}
+
+var score = runningCounter( 0 );
+
+score();                // 1
+score();                // 2
+score( 13 );            // 15
+```
+
+Warning：这个问题我们将会在后面进行更详细的讨论，但是这个使用闭包来记住状态改变的例子，可能是你想要极力避免的。
+
+如果你有一个操作需要两个输入，其中一个你现在就已经知道，但是另一个将会在之后指定，这时你就可以是用闭包来记住第一个输入：
+```JavaScript
+function makeAdder(x) {
+    return function sum(y){
+        return x + y;
+    };
+}
+
+// we already know `10` and `37` as first inputs, respectively
+var addTo10 = makeAdder( 10 );
+var addTo37 = makeAdder( 37 );
+
+// later, we specify the second inputs
+addTo10( 3 );           // 13
+addTo10( 90 );          // 100
+
+addTo37( 13 );          // 50
+```
+
+通常而言，`sum(..)`函数将会求出两个输入`x`和`y`的和。但是在这个例子中，我们先接收并保存（通过闭包）了`x`的值，而`y`的值将会在后面单独指定。
+
+Note：这种在连续的函数调用中指定输入的技术在函数式编程中非常常见，它们有两种形式：局部应用（Partial Application，也译作“偏应用”或“部分应用”）和局部套用（Currying，也译作“柯里化”）。我们将会在之后的内容中详细介绍。
+
+当然，由于函数在JS中也是一种值，我们当然也可以通过闭包来记住函数值。
+```JavaScript
+function formatter(formatFn) {
+    return function inner(str){
+        return formatFn( str );
+    };
+}
+
+var lower = formatter( function formatting(v){
+    return v.toLowerCase();
+} );
+
+var upperFirst = formatter( function formatting(v){
+    return v[0].toUpperCase() + v.substr( 1 ).toLowerCase();
+} );
+
+lower( "WOW" );             // wow
+upperFirst( "hello" );      // Hello
+```
+
+比起在我们代码中分布在各处的`toUpperCase()`和`toLowerCase()`，函数式编程更鼓励我们用简单的函数来对这种行为进行封装。
+
+具体的来说，我们创建了两个简单的一元函数`lower(..)`和`upperFirst(..)`，因为这些函数更容易连接到我们程序的其他功能。
