@@ -671,3 +671,315 @@ upperFirst( "hello" );      // Hello
 比起在我们代码中分布在各处的`toUpperCase()`和`toLowerCase()`，函数式编程更鼓励我们用简单的函数来对这种行为进行封装。
 
 具体的来说，我们创建了两个简单的一元函数`lower(..)`和`upperFirst(..)`，因为这些函数更容易连接到我们程序的其他功能。
+
+Tip: Did you spot how upperFirst(..) could have used lower(..)?
+
+We'll use closure heavily throughout the rest of the text. It may just be the most important foundational practice in all of FP, if not programming as a whole. Get really comfortable with it!
+
+## 语法
+
+在我们从这些函数入门开始之前，我们先花点时间来讨论一下函数相关的语法。
+
+无论你是否同意，在这一节中的观点比起本书的其他部分而言，都充满了我个人的主观倾向和偏好。虽然很多人觉得它们是比较绝对的准则，但它们也的确是我个人非常主观结论。最终，是否接受他们由你自己来决定。
+
+### What's In A Name?
+
+从语法上来讲，函数声明需要包含一个名称：
+```JavaScript
+function helloMyNameIs() {
+    // ..
+}
+```
+
+但是，函数表达式却有具名和匿名两种形式：
+```JavaScript
+foo( function namedFunctionExpr(){
+    // ..
+} );
+
+bar( function(){    // <-- look, no name!
+    // ..
+} );
+```
+话说回来，我们所谓的匿名到底指的是什么？具体来说是这样的，函数有一个`name`的属性，它将会保存函数在语法上给出的名称的字符串，例如`helloMyNameIs`和`namedFunctionExpr`。`name`属性最重要的功能就是，当你控制台/开发人员在追踪堆栈（通常来自于异常）时，它将参与其中，并在JS环境中列出函数列表，方便你查询。
+
+而匿名函数通常只会显示`(anonymous function)`。
+
+如果你曾经调试过跟踪异常堆栈的JS程序的话，你可能已经感受过看到一行接一行的`(anonymous function)`的痛苦。这个列表对于开发者而言毫无意义，因为它不能提供关于异常来源的任何线索。
+
+从ES6开始，匿名表达式有了*名称推断（name inferencing）*的帮助，例如：
+```JavaScript
+var x = function(){};
+
+x.name;         // x
+```
+
+如果引擎能够猜到你可能想要该函数采用什么名称，它就会为匿名函数添加名称。
+
+但是请注意，并非所有的语法形式都能够从名称推断中获益，下面这个非常常见的函数表达式，展示了当函数作为一个参数被另一个函数调用的情况：
+```JavaScript
+function foo(fn) {
+    console.log( fn.name );
+}
+
+var x = function(){};
+
+foo( x );               // x
+foo( function(){} );    //
+```
+
+当无法根据周围的语法直接推断名称时，名称属性将会保持为空字符串。在跟踪堆栈时，这样的函数将会被报告为`(anonymous function)`。
+
+当函数具名时，除开调试还有别的优势。首先句法名称（也成为词法名称）对于内部的自引用很有用。自引用对于递归（不管是异步还是同步）都是必要的，并且对于事件处理程序也有帮助。
+
+思考下面几个很容易出现的场景：
+```JavaScript
+// sync recursion:
+function findPropIn(propName,obj) {
+    if (obj == undefined || typeof obj != "object") return;
+
+    if (propName in obj) {
+        return obj[propName];
+    }
+    else {
+        let props = Object.keys( obj );
+        for (let i = 0; i < props.length; i++) {
+            let ret = findPropIn( propName, obj[props[i]] );
+            if (ret !== undefined) {
+                return ret;
+            }
+        }
+    }
+}
+```
+
+```JavaScript
+// async recursion:
+setTimeout( function waitForIt(){
+    // does `it` exist yet?
+    if (!o.it) {
+        // try again later
+        setTimeout( waitForIt, 100 );
+    }
+}, 100 );
+```
+
+```JavaScript
+// event handler unbinding
+document.getElementById( "onceBtn" )
+    .addEventListener( "click", function handleClick(evt){
+        // unbind event
+        evt.target.removeEventListener( "click", handleClick, false );
+
+        // ..
+    }, false );
+```
+
+在所有的这些情况下，具名函数的名字是一个有用且可靠的内部自引用。
+
+此外，即使是在具有单线程函数的简单情况下，命名它们也能让代码更好的解释自身，这对于之前没有阅读过它的人而言就更容易阅读了：
+```JavaScript
+people.map( function getPreferredName(person){
+    return person.nicknames[0] || person.firstName;
+} )
+// ..
+```
+
+函数名字`getPreferredName(..)`告诉了读者，这是个有关映射操作的函数，而从函数本身的代码来看，这个操作的特征并不怎么明显。所以名称标签有助于提高代码的可读性。
+
+匿名函数表达式在IIFEs（立即调用函数表达式）中也很常见：
+```JavaScript
+(function(){
+
+    // look, I'm an IIFE!
+
+})();
+```
+
+你可能几乎从没看到IIFE使用具名函数的函数表达式，但它们应该这么做。为什么？所有的原因我们上面已经介绍过了，堆栈跟踪调试，可靠的自引用和更好的可读性。如果你不能给你的IIFE命名任何名字，那么至少直接使用*IIFE*这个单词：
+```JavaScript
+(function IIFE(){
+
+    // You already knew I was an IIFE!
+
+})();
+```
+
+这就是我说**具名函数比起匿名函数而言总是更具优势**的原因。但事实上，我会说到目前为止，基本上没有匿名函数比具名函数更好的情况，匿名函数对于它们具名的同行而言，没有任何优势。
+
+但是写匿名函数实在是比较容易，因为要是写具名函数的话，我们就必须集中注意力给函数制定一个名字。
+
+说实话，我和其他人一样内疚，我也不喜欢和命名作斗争。命名的时候，最开始的3、4个名字通常都不怎么样，我必须一遍又一遍的重命名它们，相比之下我更愿意使用一个好的匿名函数表达式。
+
+但这也是*轻松编写*和*痛苦阅读*之间的交易，这并不是个划算的交易。懒惰或者缺乏创造力并不足以构成你不想给函数命名的借口。
+
+**给你的每个单函数命名吧。**如果你坐在那里，但却不能为你的函数拿出一个好名字，我觉得你可能并不完全理解这个函数的目的——或者它太过宽泛或抽象。我强烈建议你重新设计这个函数，直到它变得更加清楚。到那时，名字自然而然的就出现了。
+
+我可以从我个人的经验中证明这一点，能够努力的对某物命名的很好，这通常需要我很好的理解它，为了达到这一点我甚至经常重构它们，以提高可读性和可控性。这次的投资是值得的。
+
+### 没有`function`的函数
+
+到目前为止，我们一直使用完整规范语法的函数，但是你肯定也听说了有关ES6的`=>`箭头函数的相关小道消息。
+
+比较下面的代码：
+```JavaScript
+people.map( function getPreferredName(person){
+    return person.nicknames[0] || person.firstName;
+} )
+// ..
+
+people.map( person => person.nicknames[0] || person.firstName );
+```
+哇~
+
+关键字`function`不见了，还有`return`、`()`圆括号、`{}`花括号，还有`;`分号都不见了！对于这些所有东西，我们仅仅用了一个胖胖的箭头符号`=>`来替换它们。
+
+但是我们还省略了另一个东西。你找到了吗？函数名`getPreferredName`，也被省略了。
+
+那就对了，`=>`箭头函数在词法规定上就是匿名的，没有办法给它一个名字。它们的名字可以向普通函数那样被推断，但是最常见的函数表达式作为值的情况将同样不会得到任何帮助。
+
+如果出于某种原因，`person.nicknames`并没有被定义，此时就会抛出异常，这意味着在你跟踪堆栈的时候，位于顶端的一定是`(anonymous function)`。额……
+
+老实说，`=>`箭头函数的匿名性就是它的罩门，至少对我而言是这样。我不能接受无法命名的特性，这样的代码将会很难阅读，更难调试，也可能自我引用。
+
+但这还不算最糟糕的，最麻烦的是你必须要面对的另一个问题。在不同的场景下，你的函数定义必须要涉及一系列微妙的句法变化。我并不打算在这里详细的介绍它们，但这里有个简单的例子：
+```JavaScript
+people.map( person => person.nicknames[0] || person.firstName );
+
+// multiple parameters? need ( )
+people.map( (person,idx) => person.nicknames[0] || person.firstName );
+
+// parameter destructuring? need ( )
+people.map( ({ person }) => person.nicknames[0] || person.firstName );
+
+// parameter default? need ( )
+people.map( (person = {}) => person.nicknames[0] || person.firstName );
+
+// returning an object? need ( )
+people.map( person =>
+    ({ preferredName: person.nicknames[0] || person.firstName })
+);
+```
+The case for excitement over => in the FP world is primarily that it follows almost exactly from the mathematical notation for functions, especially around FP languages like Haskell. The shape of => arrow function syntax communicates mathematically.
+
+从更深入的角度来说，我建议赞成的`=>`的依据是，通过使用更轻量级的语法，来减少函数间的视觉边界。这会让我们使用简单的函数表达式，就像我们使用惰性表达式那样——这是另一种函数式编程人员最喜欢的东西。
+
+我认为大多数函数式编程人员并不会太关注这些问题，他们喜欢匿名函数，他们喜欢简洁的语法。但就像我之前所说的：这由你自己来决定。
+
+Note：尽管我并不喜欢在我的程序中使用`=>`，但是在本书的其它部分中，我们将会在许多地方使用它——特别是当我们提供典型的函数式应用程序时——我们将会首选更简洁的，尤其是对有限的物理空间有所优化的代码片段。是否使用这种方法将会增加或者减少代码的可读性，当然，这也得你自己来选择。
+
+## 这（This）是什么？
+
+如果你不熟悉JavaScript中`this`的绑定规则，我建议你去看看我的《你不知道的JS：This和对象原型》一书。在本节中，我假设你知道在函数的调用时如何确定`this`（四规则之一）。如果你对`this`仍然有些模糊，那这里有个好消息要告诉你——如果你试图使用函数式编程，那么你就不应该使用`this`。
+
+JavaScript的`function`有一个`this`关键字，它会在每个函数被调用的时候自动绑定。`this`这个关键字可以用很多种不同的方式来描述，但我更喜欢说，它为函数提供了一个运行的上下文对象。
+
+`this`也是函数的一个隐式的形参输入。
+
+思考：
+```JavaScript
+function sum() {
+    return this.x + this.y;
+}
+
+var context = {
+    x: 1,
+    y: 2
+};
+
+sum.call( context );        // 3
+
+context.sum = sum;
+context.sum();              // 3
+
+var s = sum.bind( context );
+s();                        // 3
+```
+
+当然，如果`this`可以被隐式的输入到函数中，那么相同的上下文对象当然也可以作为显示的实参输入：
+```JavaScript
+function sum(ctx) {
+    return ctx.x + ctx.y;
+}
+
+var context = {
+    x: 1,
+    y: 2
+};
+
+sum( context );
+```
+
+看起来要简单多了吧。这样的代码在函数式编程中更容易处理，将多个函数连接在一起也要更简单。或者在输入全是显式的情况下，使用我们将在下一章中介绍的输入竞争技术。上面这几种技术，在输入都是像`this`这样的隐式输入的情况下将会十分的尴尬，当然这也取决于应用场景。（译注：这段翻译存疑）
+
+我们可以在这个基于`this`的系统中使用其他技巧，比如说*原型委托*（更多的细节请参考《this与对象原型》）：
+```JavaScript
+var Auth = {
+    authorize() {
+        var credentials = this.username + ":" + this.password;
+        this.send( credentials, resp => {
+            if (resp.error) this.displayError( resp.error );
+            else this.displaySuccess();
+        } );
+    },
+    send(/* .. */) {
+        // ..
+    }
+};
+
+var Login = Object.assign( Object.create( Auth ), {
+    doLogin(user,pw) {
+        this.username = user;
+        this.password = pw;
+        this.authorize();
+    },
+    displayError(err) {
+        // ..
+    },
+    displaySuccess() {
+        // ..
+    }
+} );
+
+Login.doLogin( "fred", "123456" );
+```
+Note：`Object.assign(..)`是一个ES6+的小工具，它的功能是从一个或者多个源对象到单个的目标对象中，执行属性的浅复制：`Object.assign( target, source1, ... )`。
+
+如果你无法解析这段代码的意思，我来稍微解释下它做了什么：我们有两个独立的对象`Login`和`Auth`，并且`Login`对`Auth`执行了事件委托。通过委托和隐式的`this`上下文共享，这两个对象在
+
+*this*由于各种原因并不符合函数式编程的各种原则，但它明显是一个隐式的共享。我们可以更为显式的描述它，并让它在函数式的方向中更容易使用：
+```JavaScript
+// ..
+
+authorize(ctx) {
+    var credentials = ctx.username + ":" + ctx.password;
+    Auth.send( credentials, function onResp(resp){
+        if (resp.error) ctx.displayError( resp.error );
+        else ctx.displaySuccess();
+    } );
+}
+
+// ..
+
+doLogin(user,pw) {
+    Auth.authorize( {
+        username: user,
+        password: pw
+    } );
+}
+
+// ..
+```
+从我的角度来看，问题并不在于适用对象来组织行为，而是我们试图使用隐式的输入而不是显式的。当我戴着函数式编程的帽子的时候，我想我还是把`this`这东西放在架子上比较好。
+
+## 总结
+
+函数们是很强大的。
+
+但是我们应该对函数到底是什么了若指掌。它不仅仅只是语句/操作的集合。具体来说函数需要一个或者多个（理想情况下只有一个）和输出。
+
+函数内部的函数可以将外部变量闭包，并在之后依旧保持着它们的值。这是所有编程中最重要的概念之一，这也是函数式编程的基础。
+
+小心匿名函数，尤其是`=>`箭头函数。它们方便写作，但同时也将这部分成本从作者转移到了读者。我们在这里研究函数式编程的原因是为了编写更高可读性的代码，所以不要那么快的跳入那个潮流之中。
+
+不要使用`this`，不要。
