@@ -670,9 +670,9 @@ upperFirst( "hello" );      // Hello
 
 具体的来说，我们创建了两个简单的一元函数`lower(..)`和`upperFirst(..)`，因为这些函数更容易连接到我们程序的其他功能。
 
-Tip: Did you spot how upperFirst(..) could have used lower(..)?
+Tip: 你发现了吗，其实这里可以直接用`upperFirst(..)`来调用`lower(..)`的。
 
-We'll use closure heavily throughout the rest of the text. It may just be the most important foundational practice in all of FP, if not programming as a whole. Get really comfortable with it!
+我们会在本书的其他部分中大量的使用闭包，它可能是整个函数式编程中最为重要的基础实践。熟练的掌握它吧！
 
 ## 语法
 
@@ -858,9 +858,9 @@ people.map( person =>
     ({ preferredName: person.nicknames[0] || person.firstName })
 );
 ```
-The case for excitement over => in the FP world is primarily that it follows almost exactly from the mathematical notation for functions, especially around FP languages like Haskell. The shape of => arrow function syntax communicates mathematically.
+`=>`运算符在函数式的世界中备受推崇是有原因的，主要是因为它是个完全遵循于数学形式的函数符号，尤其是在像`Haskell`这样的函数式编程语言中，我们就是使用形如`=>`的箭头函数语法来和数学符号进行交流。
 
-从更深入的角度来说，我建议赞成的`=>`的依据是，通过使用更轻量级的语法，来减少函数间的视觉边界。这会让我们使用简单的函数表达式，就像我们使用惰性表达式那样——这是另一个函数式编程人员最喜欢的东西。
+从更深入的角度来说，我建议赞成`=>`的主要理由是这样的，通过使用更轻量级的语法，来减少函数间的视觉边界。这会让我们使用简单的函数表达式，就像我们使用惰性表达式那样——这是另一个函数式编程人员最喜欢的东西。
 
 我认为大多数函数式编程人员并不会太关注这些问题，他们喜欢匿名函数，他们喜欢简洁的语法。但就像我之前所说的：这由你自己来决定。
 
