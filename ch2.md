@@ -149,7 +149,8 @@ foo( 3, 4 );
 
 接受不确定的自变量函数签名（译注）被称为可变函数，有很多人喜欢这种风格的函数设计，但是我想你会发现，通常而言，函数式编程者们一般都想避免这些可能。
 
-译注：函数签名，即*Function signature*，又被称作*Type signature*。它通常包含了参数的数量，参数的类型和函数包含的参数的顺序，通常在重载解析期间使用函数签名来选择在许多重载形式中调用正确的函数。JavaScript中并没有函数签名以及函数重载功能，但是根据输入参数的不同进行不同的逻辑处理，在这一点上和函数签名的功能是比较类似的。
+译注：函数签名，即*Function signature*，又被称作*Type signature*。它包含了参数的数量，参数的类型和函数包含的参数的顺序，通常在重载解析期间使用函数签名来选择在许多重载形式中调用正确的函数。
+JavaScript中并没有函数签名以及函数重载功能，但是根据输入参数的不同进行不同的逻辑处理，在这一点上和函数签名的功能是比较类似的。
 
 好了，在这一点上的阐述已经足够了。
 
@@ -860,7 +861,7 @@ people.map( person =>
     ({ preferredName: person.nicknames[0] || person.firstName })
 );
 ```
-`=>`运算符在函数式的世界中备受推崇是有原因的，主要是因为它是个完全遵循于数学形式的函数符号，尤其是在像`Haskell`这样的函数式编程语言中，我们就是使用形如`=>`的箭头函数语法来和数学符号进行交流。
+`=>`运算符在函数式的世界中备受推崇是有原因的，主要是因为它是个完全遵循于数学形式的函数符号，尤其是在像`Haskell`这样的函数式编程语言中，我们就是使用形如`=>`的箭头函数语法来和数学符号进行交流的。
 
 从更深入的角度来说，我建议赞成`=>`的主要理由是这样的，通过使用更轻量级的语法，来减少函数间的视觉边界。这会让我们使用简单的函数表达式，就像我们使用惰性表达式那样——这是另一个函数式编程人员最喜欢的东西。
 
@@ -945,7 +946,7 @@ Login.doLogin( "fred", "123456" );
 ```
 Note：`Object.assign(..)`是一个ES6+的小工具，它的功能是对一个或者多个源对象执行属性的浅复制，并把复制的键值对放置到单个的目标对象中：`Object.assign( target, source1, ... )`。
 
-如果你无法解析这段代码的意思，我来稍微解释下它做了什么：我们有两个独立的对象`Login`和`Auth`，并且`Login`对`Auth`执行了事件委托。Through delegation and the implicit this context sharing, these two objects virtually compose during the this.authorize() function call, so that properties/methods on this are dynamically shared with the Auth.authorize(..) function.
+如果你无法理解这段代码的意思，我来稍微解释下它做了什么：我们有两个独立的对象`Login`和`Auth`，并且`Login`对`Auth`执行了事件委托。通过委托和隐式的`this`上下文共享，这两个对象在`this.authorize()`函数调用期间被*虚拟*的合并了起来，所以在`Auth.authorize(..)`函数中，属性/方法通过`this`实现了动态共享。
 
 *this*由于各种原因并不符合函数式编程的各种原则，但它明显是一个隐式的共享。我们可以更为显式的描述它，并让它在函数式的方向中更容易使用：
 ```JavaScript
