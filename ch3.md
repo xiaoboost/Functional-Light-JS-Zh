@@ -74,7 +74,96 @@ var partial =
 		(...laterArgs) =>
 			fn( ...presetArgs, ...laterArgs );
 ```
+这么写是没有问题的，而且毫无疑问要更简洁更稀疏。但是我个人觉得无论这里的数学符号再怎么对称，它在整体可读性方面失去的更多，所有这些函数都是匿名的，并且由于这里模糊的函数边界，导致想要辨别这里的闭包变得更加困难。
 
-现：5001字符
+无论使用哪种语法，你都能看出，我们使用`partial(..)`函数实现了提前局部应用的函数：
+```JavaScript
+var getPerson = partial( ajax, "http://some.api/person" );
+
+var getOrder = partial( ajax, "http://some.api/order" );
+```
+在这里暂停一下，然后好好想想`getPerson(..)`函数的形态/内部。它应看起来应该是这样：
+```JavaScript
+var getPerson = function partiallyApplied(...laterArgs) {
+	return ajax( "http://some.api/person", ...laterArgs );
+};
+```
+`getOrder(..)`也是如此，那么`getCurrentUser(..)`又是怎样的呢？
+```JavaScript
+// version 1
+var getCurrentUser = partial(
+	ajax,
+	"http://some.api/person",
+	{ user: CURRENT_USER_ID }
+);
+
+// version 2
+var getCurrentUser = partial( getPerson, { user: CURRENT_USER_ID } );
+```
+我们可以直接指定`url`和数据的实参来定义`getCurrentUser(..)`（版本一），也可以把` getCurrentUser(..)`定义为`getPerson(..)`的局部应用，同时仅指定附加的数据实参。
+
+版本二是个更为简洁的表达，因为它重用了一些已经定义的东西，因此我认为它更为符合FP的精神。
+
+为了确保我们理解了这两个版本的函数是如何工作的，下面分别是它们此时的完整代码：
+```JavaScript
+// version 1
+var getCurrentUser = function partiallyApplied(...laterArgs) {
+	return ajax(
+		"http://some.api/person",
+		{ user: CURRENT_USER_ID },
+		...laterArgs
+	);
+};
+
+// version 2
+var getCurrentUser = function outerPartiallyApplied(...outerLaterArgs) {
+	var getPerson = function innerPartiallyApplied(...innerLaterArgs){
+		return ajax( "http://some.api/person", ...innerLaterArgs );
+	};
+
+	return getPerson( { user: CURRENT_USER_ID }, ...outerLaterArgs );
+}
+```
+同样的，在这里暂停，并重新阅读这里的代码片段，以确保你理解了这里发生了什么。
+
+Note: 第二个版本有一个额外的函数包装层，这看起来可能有点奇怪以及多余，但是这也是你在函数式编程中必须要习惯的事情。随着文章的进行，我们将会把许多函数不断堆叠在一起。记住，这是*函数式编程*！
+
+我们来看看局部应用有用性的另一个例子。考虑这样一个`add(..)`函数，它接受两个实参，并把它们加了起来：
+```JavaScript
+function add(x,y) {
+	return x + y;
+}
+```
+现在想象一下，这里有一个数字列表，我们想要给这个列表中每个数字都加上一个数字。我们将使用JS数组中内置的`map(..)`方法。
+```JavaScript
+[1,2,3,4,5].map( function adder(val){
+	return add( 3, val );
+} );
+// [4,5,6,7,8]
+```
+Note: 不要担心你之前从没见过`map(..)`函数，我们将会在本书的后面对它进行更为详细的介绍。现在你只需要知道它将枚举一个数组的所有元素，并通过调用一个函数来产生新的值，这些新的值将会组成一个新的数组。
+
+我们无法直接传递`add(..)`给`map(..)`是因为`add(..)`的签名与`map(..)`函数的映射并不匹配。此时局部应用就能够帮助我们了：我们可以把`add(..)`函数的签名改写成可以匹配的东西。
+```JavaScript
+[1,2,3,4,5].map( partial( add, 3 ) );
+// [4,5,6,7,8]
+```
+
+## `bind(..)`
+JavaScript有一个名为`bind(..)`的内建方法，它对所有的函数都有效。它有两个能力：预设`this`上下文并应用部分参数。
+
+我认为将这两个功能合并在一个方法中是非常不幸的。有时候你会想要显式的绑定`this`上下文，而不是部分的应用参数。有时候你又会想要应用部分参数，但并不关心`this`绑定。我个人几乎从来没有碰到这两者同时进行的情景。
+
+后一种情况更是尴尬，因为你必须传递一个可忽略的占位符，这个绑定的实参（第一个）通常是`null`。
+
+像是这样：
+```JavaScript
+var getPerson = ajax.bind( null, "http://some.api/person" );
+```
+That `null` just bugs me to no end.
+
+## Reversing Arguments
+
+现：9257字符
 共：46016字符
-进度： 10.8%
+进度： 20.1%
