@@ -160,10 +160,80 @@ JavaScript有一个名为`bind(..)`的内建方法，它对所有的函数都有
 ```JavaScript
 var getPerson = ajax.bind( null, "http://some.api/person" );
 ```
-That `null` just bugs me to no end.
+这个`null`真的让我发狂。
 
-## Reversing Arguments
+## 反转实参
+回想一下，我们的`Ajax`函数的签名是`ajax( url, data, cb )`。如果我们想先局部应用`cb`但是又想等会再应用`data`和`url`？我们可以创建这样一个方法，这个方法将会把原函数包装起来，并且反转其参数顺序：
+```JavaScript
+function reverseArgs(fn) {
+	return function argsReversed(...args){
+		return fn( ...args.reverse() );
+	};
+}
 
-现：9257字符
+// or the ES6 => arrow form
+var reverseArgs =
+	fn =>
+		(...args) =>
+			fn( ...args.reverse() );
+```
+现在我们可以反转`ajax(..)`实参的顺序了，这样我们从右边的参数开始局部应用，而不是从左边开始。想要恢复预期的顺序，我们可以继续反转局部应用的函数：
+```JavaScript
+var cache = {};
+
+var cacheResult = reverseArgs(
+	partial( reverseArgs( ajax ), function onResult(obj){
+		cache[obj.id] = obj;
+	} )
+);
+
+// later:
+cacheResult( "http://some.api/person", { user: CURRENT_USER_ID } );
+```
+
+现在，我们可以使用相同的反转局部应用的技巧，来定义一个`partialRight(..)`方法，它将从右边开始局部应用：
+```JavaScript
+function partialRight( fn, ...presetArgs ) {
+	return reverseArgs(
+		partial( reverseArgs( fn ), ...presetArgs.reverse() )
+	);
+}
+
+var cacheResult = partialRight( ajax, function onResult(obj){
+	cache[obj.id] = obj;
+});
+
+// later:
+cacheResult( "http://some.api/person", { user: CURRENT_USER_ID } );
+```
+
+`partialRight(..)`这种实现不能保证特定的形参接收到特定的局部应用的值，它只能确保局部应用的右半部分值是传递给原始函数最右边的实参。
+
+比如：
+```JavaScript
+function foo(x,y,z) {
+	var rest = [].slice.call( arguments, 3 );
+	console.log( x, y, z, rest );
+}
+
+var f = partialRight( foo, "z:last" );
+
+f( 1, 2 );			// 1 2 "z:last" []
+
+f( 1 );				// 1 "z:last" undefined []
+
+f( 1, 2, 3 );		// 1 2 3 ["z:last"]
+
+f( 1, 2, 3, 4 );	// 1 2 3 [4,"z:last"]
+```
+`"z:last"`这个值被确实应用到`z`这个形参中，只有当`f(..)`函数时恰好只传递了两个实参的情况（匹配`x`和`y`形参）。在其余情况下，不管你在前面传入多少个实参，`"z:last"`都将仅仅匹配最右边的实参。
+
+# 一次一个
+我们来看一个类似于局部应用的技术，一个期望输入多个实参的函数被分解成连续的链式函数，每个函数都将只接收一个实参（计数值：1），并且将会返回另一个函数来接受下一个实参。
+
+这个技术被称之为*柯里化 currying*。
+
+
+现：11799字符
 共：46016字符
-进度： 20.1%
+进度： 25%
