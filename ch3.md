@@ -233,7 +233,67 @@ f( 1, 2, 3, 4 );	// 1 2 3 [4,"z:last"]
 
 这个技术被称之为*柯里化 currying*。
 
+首先，我们先来想想之前已经创建好的`ajax(..)`函数被柯里化之后的样子吧。按照定义，我们应该这么使用它：
+```JavaScript
+curriedAjax( "http://some.api/person" )
+	( { user: CURRENT_USER_ID } )
+		( function foundUser(user){ /* .. */ } );
+```
+也许把它拆成三个独立的调用有助于我们更好的理解情况：
+```JavaScript
+var personFetcher = curriedAjax( "http://some.api/person" );
 
-现：11799字符
+var getCurrentUser = personFetcher( { user: CURRENT_USER_ID } );
+
+getCurrentUser( function foundUser(user){ /* .. */ } );
+```
+在这里既没有立刻使用所有参数（比如`ajax(..)`），也没有先应用部分然后再应用剩下的（比如`partial(..)`），这里的`curriedAjax(..)`函数在每个独立的函数调用中都只接受一个实参。
+
+柯里化和局部应用在某种意义上是比较类似的，因为每个连续的柯里调用都可以看作是把另一个实参局部应用到原始函数中，直到所有实参都被传递了进去。
+
+它们之间的最主要的区别是，`curriedAjax(..)`将会显式的返回一个函数（我们叫它`curriedGetPerson(..)`），它需要*仅输入下一个*实参数据，而不是所有剩下的实参（就像之前的`getPerson(..)`）。
+
+假如原始函数预期输入5个实参，那么该函数的柯里形式只需要第一个实参，然后返回一个函数来接受第二个实参，这个函数只需要接受第二个实参，并返回一个函数来接受第三个实参……以此类推。
+
+所以，柯里化将多计数值的函数转化为一个系列函数的链式调用。
+
+我们如何定义一个方法来实现柯里化呢？我们将会使用第二章中的一些技巧：
+```JavaScript
+function curry(fn,arity = fn.length) {
+	return (function nextCurried(prevArgs){
+		return function curried(nextArg){
+			var args = prevArgs.concat( [nextArg] );
+
+			if (args.length >= arity) {
+				return fn( ...args );
+			}
+			else {
+				return nextCurried( args );
+			}
+		};
+	})( [] );
+}
+```
+给ES6的`=>`粉丝们：
+```JavaScript
+var curry =
+	(fn, arity = fn.length, nextCurried) =>
+		(nextCurried = prevArgs =>
+			nextArg => {
+				var args = prevArgs.concat( [nextArg] );
+
+				if (args.length >= arity) {
+					return fn( ...args );
+				}
+				else {
+					return nextCurried( args );
+				}
+			}
+		)( [] );
+```
+
+
+
+现：14049字符
 共：46016字符
-进度： 25%
+进度： 30%
