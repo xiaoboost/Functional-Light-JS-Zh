@@ -274,7 +274,7 @@ function curry(fn,arity = fn.length) {
 	})( [] );
 }
 ```
-给ES6的`=>`粉丝们：
+给ES6`=>`符号的粉丝们：
 ```JavaScript
 var curry =
 	(fn, arity = fn.length, nextCurried) =>
@@ -291,9 +291,62 @@ var curry =
 			}
 		)( [] );
 ```
+这个方法将会从实参集合`prevArgs`为空`[]`数组的时候开始，并将每个接收到的`nextArg`添加其中，然后调用串联好的`args`数组。当`args.length`小于`arity`（原始函数`fn(..)`声明/期望的的形参数量）时，将会返回另一个`curried(..)`函数来继续收集接下来的nextArg`实参，传递运行的`args`集合作为`prevArgs`。一旦我们有了足够的实参，就可以用它们来执行原始函数`fn(..)`函数了。
+
+默认情况下，这样的实现依赖于能够检查待柯里化函数的`length`属性，以确定在收集所有预期的实参之前需要迭代多少次柯里化。
+
+如果你对有不准确`length`属性的函数使用了这里的`curry(..)`实现——如何函数的形参签名包含了默认形参值，形参解构赋值，又或者是`...args`运算，请参考第二章——你需要手动的将`arity`（`curry(..)`的第二个形参）传递进去，以确保`curry(..)`的正确工作。
+
+这里是我们如何使用`curry(..)`来改写我们之前的`ajax(..)`的例子：
+```JavaScript
+var curriedAjax = curry( ajax );
+
+var personFetcher = curriedAjax( "http://some.api/person" );
+
+var getCurrentUser = personFetcher( { user: CURRENT_USER_ID } );
+
+getCurrentUser( function foundUser(user){ /* .. */ } );
+```
+每次调用都给原始函数`ajax(..)`的调用增加一个实参，直到提供了所有的三个参数，此时`ajax(..)`就被执行了。
+
+还记得我们之前给列表中每个值加`3`的例子吗？我们之前说过，柯里化和局部应用是很相似的，所以我们可以用几乎相同的方法来执行这个任务：
+```JavaScript
+[1,2,3,4,5].map( curry( add )( 3 ) );
+// [4,5,6,7,8]
+```
+这两者之间有什么区别？`partial(add,3)` vs `curry(add)(3)`。为什么你会选择`curry(..)`而不是`partial(..)`？在你提前知道`add(..)`是用来调整的函数，但此时`3`这个值你好并不知道：
+```JavaScript
+var adder = curry( add );
+
+// later
+[1,2,3,4,5].map( adder( 3 ) );
+// [4,5,6,7,8]
+```
+另一个数字的例子会是怎么样呢，把它们同时排列出来就行啦：
+```JavaScript
+function sum(...args) {
+	var sum = 0;
+	for (let i = 0; i < args.length; i++) {
+		sum += args[i];
+	}
+	return sum;
+}
+
+sum( 1, 2, 3, 4, 5 );						// 15
+
+// now with currying:
+// (5 to indicate how many we should wait for)
+var curriedSum = curry( sum, 5 );
+
+curriedSum( 1 )( 2 )( 3 )( 4 )( 5 );		// 15
+```
+在这里柯里化的好处是，每次调用传递实参都会产生另一个更为专业的函数，我们可以在程序中捕获并使用该新函数。局部应用则是先指定部分实参，然后生成一个等待其余实参的函数。
+
+如果要使用局部应用来实现依次指定一个参数，则必须在每个连续的函数上持续调用`partialApply(..)`。柯里化则能自动进行，这样一次一个的独立参数调用更加符合人体工程学。
+
+在JavaScript中，柯里化和局部应用都是用了闭包来记录实参，直到所有实参都被接收到了，然后就能执行原始运算了。
 
 
-
-现：14049字符
-共：46016字符
-进度： 30%
+现：17324字符  
+共：46016字符  
+进度： 37%  
