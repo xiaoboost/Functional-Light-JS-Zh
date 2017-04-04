@@ -41,7 +41,7 @@
 
 [Table of Contents](https://github.com/getify/Functional-Light-JS/blob/master/toc.md)
 
-* Foreword (TBA)
+* [Foreword](https://github.com/getify/Functional-Light-JS/blob/master/foreword.md) (by [Brian Lonsdorf aka "Prof Frisby"](https://twitter.com/DrBoolean))
 * [Preface](https://github.com/getify/Functional-Light-JS/blob/master/preface.md)
 * [Chapter 1: Why Functional Programming?](https://github.com/getify/Functional-Light-JS/blob/master/ch1.md)
 * [Chapter 2: Foundations of Functional Functions](https://github.com/getify/Functional-Light-JS/blob/master/ch2.md)
