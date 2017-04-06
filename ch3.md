@@ -400,6 +400,76 @@ function looseCurry(fn,arity = fn.length) {
 ```
 现在每个柯里化调用都可以接受一个或者多个（`nextArgs`）实参，我们将把它作为一个练习，感兴趣的读者可以使用ES6的`=>`符号来定义`looseCurry(..)`，就像我们之前对`curry(..)`所做的那样。
 
-现：21821字符  
+## 请不要再给我柯里化了……
+有时候也会有这样一种情况，你有一个已经柯里化的函数，但是你想把它去柯里化，转变为普通函数——基本上就像是把函数`f(1)(2)(3)`变化为`g(1, 2,3)`函数。
+
+这个令人（并不）震惊的标准方法通常被称作`uncurry(..)`。这里是一个简单的原生实现：
+```JavaScript
+function uncurry(fn) {
+	return function uncurried(...args){
+		var ret = fn;
+
+		for (let i = 0; i < args.length; i++) {
+			ret = ret( args[i] );
+		}
+
+		return ret;
+	};
+}
+
+// or the ES6 => arrow form
+var uncurry =
+	fn =>
+		(...args) => {
+			var ret = fn;
+
+			for (let i = 0; i < args.length; i++) {
+				ret = ret( args[i] );
+			}
+
+			return ret;
+		};
+```
+警告：不要假设`uncurry(curry(f))`相比`f`而言会有相同的行为。在一些库中，去柯里化得到的函数和原始函数是挺相似的，但并不完全相等。当然，我们在这里的例子也是一样的。假如你传递了和原始函数相同数量的实参给去柯里化所得的函数，那么它的行为（绝大部分）是和原始函数相同的。然而，假如你只传递了较少的实参，你仍然得到一个部分柯里化的函数，它将会继续等待其他参数的输入。下面这个片段将会说明这个古怪的行为：
+```JavaScript
+function sum(...args) {
+	var sum = 0;
+	for (let i = 0; i < args.length; i++) {
+		sum += args[i];
+	}
+	return sum;
+}
+
+var curriedSum = curry( sum, 5 );
+var uncurriedSum = uncurry( curriedSum );
+
+curriedSum( 1 )( 2 )( 3 )( 4 )( 5 );		// 15
+
+uncurriedSum( 1, 2, 3, 4, 5 );				// 15
+uncurriedSum( 1, 2, 3 )( 4 )( 5 );			// 15
+```
+在使用`uncurry(..)`函数的时候，可能更为常见的情况并不是用它来处理像刚才显示的那样手动柯里化的函数，而是由于某些其他操作而生成的柯里化函数。我们将会在本章后面的 "No Points" 中来说明这种情况。
+
+# 为了唯一的所有
+// TODO:好吧这个翻译确实很中二……原文（All For One）
+想象一下，你把一个函数传递给了一个方法，这个方法将会传递多个实参给你的函数，但是你可能只想接受一个单独的参数。尤其是当你有我们在上文中讨论过的宽松柯里化函数时，此时你的函数就会接受更多你不想要的参数。
+
+我们可以设计一个封装了函数调用的方法，来确保只有一个实参被传递进来。因为这里将会强制将函数当做是一元函数，所以让我们这么命名它：
+```JavaScript
+function unary(fn) {
+	return function onlyOneArg(arg){
+		return fn( arg );
+	};
+}
+
+// or the ES6 => arrow form
+var unary =
+	fn =>
+		arg =>
+			fn( arg );
+```
+
+
+现：24339字符  
 共：46016字符  
-进度： 47%  
+进度： 52%  
