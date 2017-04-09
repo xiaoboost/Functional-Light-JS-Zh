@@ -513,7 +513,7 @@ var identity =
 ```
 这个方法看起来实在是太简单了，以至于好像没什么用。但即使是非常简单的函数，也可以在函数式的世界中有所帮助。就像他们在戏里说过的一样：there are no small parts, only small actors.
 
-例如，假设你希望使用正则表达式来切割字符串，但是结果数组中可能存在一些空值，为了丢弃这些空值，我们可以把`identity(..)`当做是predicate，对它使用JS的`fitler(..)`数组操作（我们将在之后的内容中做详细讲解）：
+例如，假设你希望使用正则表达式来切割字符串，但是结果数组中可能存在一些空值，为了丢弃这些空值，我们可以把`identity(..)`当做是谓词（译注：Predicates，在计算机领域内是指返回真、假或是未确定值的条件表达式），对它使用JS的`fitler(..)`数组操作（我们将在之后的内容中做详细讲解）：
 ```JavaScript
 var words = "   Now is the time for all...  ".split( /\s|\b/ );
 words;
@@ -522,7 +522,59 @@ words;
 words.filter( identity );
 // ["Now","is","the","time","for","all","..."]
 ```
+Tips：在上面的例子中，还有另一个一元函数可以在这里当作谓词，那就是JS自己的`Boolean(..)`函数，它能够
+显式的将值强制转换为`true`和`false`。
 
-现：26382字符  
+`identity(..)`另一个用处就是可以作为默认函数来代替转换：
+```JavaScript
+function output(msg,formatFn = identity) {
+	msg = formatFn( msg );
+	console.log( msg );
+}
+
+function upper(txt) {
+	return txt.toUpperCase();
+}
+
+output( "Hello World", upper );		// HELLO WORLD
+output( "Hello World" );			// Hello World
+```
+假如`output(..)`没有`formatFn`的默认值，我们可以把我们之前的朋友`partialRight(..)`拿过来：
+```JavaScript
+var specialOutput = partialRight( output, upper );
+var simpleOutput = partialRight( output, identity );
+
+specialOutput( "Hello World" );		// HELLO WORLD
+simpleOutput( "Hello World" );		// Hello World
+```
+你也能看到`identity(..)`被用来作为`map(..)`调用的默认转换函数，或者是列表的`reduce(..)`函数的初始值，这些方法我们我们将会在第八章中详细讲解。
+
+## 不变之值
+某些API不允许你将值直接传递到方法中，所以你必须传递函数，即使该函数只是直接返回值。 在JS Promises中一的`then(..)`方法就是这样的API。许多人声称ES6的`=>`箭头函数是这种情况下的“解决方案”，但是有一个函数式的方法非常适合这个需求：
+```JavaScript
+function constant(v) {
+	return function value(){
+		return v;
+	};
+}
+
+// or the ES6 => form
+var constant =
+	v =>
+		() =>
+			v;
+```
+有了这个正解的小方法，我们就可以解决`then(..)`的烦恼啦：
+```JavaScript
+p1.then( foo ).then( () => p2 ).then( bar );
+
+// vs
+
+p1.then( foo ).then( constant( p2 ) ).then( bar );
+```
+Warning：虽然`() => p2`箭头函数版本虽然比`constant(p2)`要短，但我仍然希望你能克制使用它的诱惑。箭头函数将会返回从外部而来的一个值，这从函数式的角度来说要更差一点，第五章“减少副作用”的内容将会详细介绍这类行为陷阱。
+
+
+现：28427字符  
 共：46016字符  
-进度： 57%  
+进度： 61%  
