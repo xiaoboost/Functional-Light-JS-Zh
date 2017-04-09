@@ -450,7 +450,7 @@ uncurriedSum( 1, 2, 3 )( 4 )( 5 );			// 15
 ```
 在使用`uncurry(..)`函数的时候，可能更为常见的情况并不是用它来处理像刚才显示的那样手动柯里化的函数，而是由于某些其他操作而生成的柯里化函数。我们将会在本章后面的 "No Points" 中来说明这种情况。
 
-# 一切归一
+# 归一化
 想象一下，你把一个函数传递给了一个方法，这个方法将会传递多个实参给你的函数，但是你可能只想接受一个单独的参数。尤其是当你有我们在上文中讨论过的宽松柯里化函数时，此时你的函数就会接受更多你不想要的参数。
 
 我们可以设计一个封装了函数调用的方法，来确保只有一个实参被传递进来。因为这里将会强制将函数当做是一元函数，所以我们这么命名它：
@@ -468,6 +468,61 @@ var unary =
 			fn( arg );
 ```
 
-现：24339字符  
+我们之前看到了`map(..)`方法，它给需要映射的函数提供了三个实参，`value`、`index`和`list`。如果您希望映射的函数仅接收其中的一个，比如`value`，那就可以使用`unary(..)`操作：
+```JavaScript
+function unary(fn) {
+	return function onlyOneArg(arg){
+		return fn( arg );
+	};
+}
+
+var adder = looseCurry( sum, 2 );
+
+// oops:
+[1,2,3,4,5].map( adder( 3 ) );
+// ["41,2,3,4,5", "61,2,3,4,5", "81,2,3,4,5", "101, ...
+
+// fixed with `unary(..)`:
+[1,2,3,4,5].map( unary( adder( 3 ) ) );
+// [4,5,6,7,8]
+```
+另一个常用的使用`unary(..)`的例子：
+```JavaScript
+["1","2","3"].map( parseFloat );
+// [1,2,3]
+
+["1","2","3"].map( parseInt );
+// [1,NaN,NaN]
+
+["1","2","3"].map( unary( parseInt ) );
+// [1,2,3]
+```
+对于签名`parseInt(str,radix)`，很明显`map(..)`将会在实参的第二个位置传递`index`，而这个实参将会被`parseInt(..)`解析为`radix`，这并不是我们希望看到的情况。`unary(..)`将会创建一个忽略除开第一个实参意外所有实参的函数，这意味着传递进去的`index`将不会被错误的当做是`radix`。
+
+## One One One
+说道只有一个实参的函数，函数式编程的工具中还有另一个很常见的基本操作，它接受一个实参，但是不对它做任何操作就直接返回它本身：
+```JavaScript
+function identity(v) {
+	return v;
+}
+
+// or the ES6 => arrow form
+var identity =
+	v =>
+		v;
+```
+这个方法看起来实在是太简单了，以至于好像没什么用。但即使是非常简单的函数，也可以在函数式的世界中有所帮助。就像他们在戏里说过的一样：there are no small parts, only small actors.
+
+例如，假设你希望使用正则表达式来切割字符串，但是结果数组中可能存在一些空值，为了丢弃这些空值，我们可以把`identity(..)`当做是predicate，对它使用JS的`fitler(..)`数组操作（我们将在之后的内容中做详细讲解）：
+```JavaScript
+var words = "   Now is the time for all...  ".split( /\s|\b/ );
+words;
+// ["","Now","is","the","time","for","all","...",""]
+
+words.filter( identity );
+// ["Now","is","the","time","for","all","..."]
+```
+
+现：26382字符  
 共：46016字符  
-进度： 52%  
+进度： 57%  
