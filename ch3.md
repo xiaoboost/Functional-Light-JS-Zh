@@ -574,7 +574,87 @@ p1.then( foo ).then( constant( p2 ) ).then( bar );
 ```
 Warning：虽然`() => p2`箭头函数版本虽然比`constant(p2)`要短，但我仍然希望你能克制使用它的诱惑。箭头函数将会返回从外部而来的一个值，这从函数式的角度来说要更差一点，第五章“减少副作用”的内容将会详细介绍这类行为陷阱。
 
+# Spread 'Em Out
+在第二章我们简单的介绍了下形参数组的解构赋值，我们回顾一下这个例子：
+```JavaScript
+function foo( [x,y,...args] ) {
+	// ..
+}
 
-现：28427字符  
+foo( [1,2,3] );
+```
+在`foo(..)`的形参列表中，我们进行了这样的声明，我们希望将一个单独的数组实参分解——或者从实际效果上来讲，应该叫展开——并将其赋值给独立的命名形参`x`和`y`。数组中除了头两个位置之外的其他值都会被`...`运算符聚合到`args`数组中。
+
+如果必须传入一个数组，但是你想把它的内容当做是独立的参数来处理，此时这个技巧会非常方便。
+
+有时候你想使用形参数组的解构赋值，但是却没有能力去改变函数的声明，想想这样的函数：
+```JavaScript
+function foo(x,y) {
+	console.log( x + y );
+}
+
+function bar(fn) {
+	fn( [ 3, 9 ] );
+}
+
+bar( foo );			// fails
+```
+你能指出，为什么`bar(foo)`失败了吗？
+
+数组`[3, 9]`被当做是一个单独的值被传输给了`fn(..)`，但`foo(..)`的正确输入应该是分立参数`x`和`y`。假如我们能够把函数`foo(..)`的声明改变为`function foo([x,y]) {..`，那就最好不过了。又或者是我们可以改变`bar(..)`的行为，让它这样来进行函数调用`fn(...[3, 9])`，这两个值`3`和`9`都将会被独立传递进去。
+
+有时候你就是有两个这样不兼容的函数，并且由于各种外部原因，你又无法更改其声明/定义。那么问题来了，你要如何使用它们呢？
+
+我们可以定义一个辅助函数来调整它们，以便于它将一个接收到的数组拆分开来：
+```JavaScript
+function spreadArgs(fn) {
+	return function spreadFn(argsArr) {
+		return fn( ...argsArr );
+	};
+}
+
+// or the ES6 => arrow form
+var spreadArgs =
+	fn =>
+		argsArr =>
+			fn( ...argsArr );
+```
+Note：我这里的辅助函数名为`spreadArgs(..)`，但是在像*Ramda*这样的库中，它通常被称为`apply(..)`。
+
+现在我们可以使用`spreadArgs(..)`来调整`foo(..)`了，这样它就能给`bar(..)`正确的输入了。
+```JavaScript
+bar( spreadArgs( foo ) );			// 12
+```
+这里到底发生了什么，似乎有点难以理解，但是请相信我，它们能够正常工作。从本质上来说，`spreadArgs(..)`将会允许我们定义一个通过数组来`return`多个值的函数，并且这多个值对于另一个函数的输入而言，也将会被看做是独立的值。
+
+当一个函数的输出成为了另一个函数的输入，这样的行为被称作*函数组合 composition*，我们将会在第四章详细的介绍它们。
+
+当我们在讨论`spreadArgs(..)`方法的时候，我们再来定义一个与之相对的方法吧：
+```JavaScript
+function gatherArgs(fn) {
+	return function gatheredFn(...argsArr) {
+		return fn( argsArr );
+	};
+}
+
+// or the ES6 => arrow form
+var gatherArgs =
+	fn =>
+		(...argsArr) =>
+			fn( argsArr );
+```
+Note: 在*Ramda*中，这个方法被称作`unapply(..)`，它与`apply(..)`刚好相反，我觉得*扩展 spread*、*聚合 gather*这样的术语对于发生了什么更具描述性。
+
+我们可以使用这个方法把独立的实参聚合成为一个单独的数组，因为我们可能会面临这样的情况，我们需要调整一个数组形参解构赋值的函数，让它去接受另一个函数的输出，而这些输出则是一些独立的实参。我们将会在第8章更详细的介绍`reduce(..)`，但是简单的来说，它将会不断调用他那有两个独立形参的毁掉函数，现在我们能够把它们*聚合*起来了：
+```JavaScript
+function combineFirstTwo([ v1, v2 ]) {
+	return v1 + v2;
+}
+
+[1,2,3,4,5].reduce( gatherArgs( combineFirstTwo ) );
+// 15
+```
+
+现：31844字符  
 共：46016字符  
-进度： 61%  
+进度： 69%  
