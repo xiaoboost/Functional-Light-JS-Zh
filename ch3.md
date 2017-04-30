@@ -774,8 +774,165 @@ f4( { z: 3, x: 1 } );
 你必须仔细权衡这些因素。
 
 # No Points
+函数式编程的世界中流行的编码风格是这样的，通过删除不必要的形参-实参映射来一定程度上减少视觉混乱。这种风格正式的名字是叫*Tacit programming*，或者普通点的叫法是：*point-free style*。单词*point*在这里指代的是函数的形参。
 
+警告：
 
-现：38745字符  
-共：46016字符  
-进度： 84%  
+让我们从一个简单的例子开始：
+```JavaScript
+function double(x) {
+	return x * 2;
+}
+
+[1,2,3,4,5].map( function mapper(v){
+	return double( v );
+} );
+// [2,4,6,8,10]
+```
+你看到了吗，`mapper(..)`和`double(..)`有着相同（或者叫兼容的）签名。在`double(..)`调用的时候，形参（*point*）`v`能够直接映射到对应的实参。因此，`mapper(..)`函数的封装是完全没有必要的。让我们来试试更简单的*point-free style*：
+```JavaScript
+function double(x) {
+	return x * 2;
+}
+
+[1,2,3,4,5].map( double );
+// [2,4,6,8,10]
+```
+
+我们来复习下之前的另一个例子：
+```JavaScript
+["1","2","3"].map( function mapper(v){
+	return parseInt( v );
+} );
+// [1,2,3]
+```
+在这个例子中，`mapper(..)`的存在实际上是服务于一个非常重要的目的，我们需要舍弃掉从`map(..)`传入的`index`实参，因为`parseInt(..)`将会错误的将该值当作是解析值的基数。下面是`unary(..)`帮助处理这种情况的例子：
+```JavaScript
+["1","2","3"].map( unary( parseInt ) );
+// [1,2,3]
+```
+你需要注意的关键在于，假如你有一个带有形参的函数，而它将会直接传递给内部的函数调用。在上面的两个例子中，`mapper(..)`都有形参`v`，而且它都被径直传递给了另外的函数调用。我们可以使用`unary(..)`的*point-free*表达式来代替这层抽象。
+
+Warning：你可能已经像我一样被吸引住了，然后开始尝试`map(partialRight(parseInt,10))`，想要部分应用`10`这个值，作为`radix`。然而，正如我之前所提到的，`partialRight(..)`只能保证`10`将会是传入的最后一个实参，而不是特定的第二个实参。由于`map(..)`将会三个实参`(value, index, arr)`传递给它的映射函数，所以`10`将会成为`parseInt(..)`的第四个参数，而`parseInt(..)`只会注意前两个实参。
+
+这里有另外一个例子：
+```JavaScript
+// convenience to avoid any potential binding issue
+// with trying to use `console.log` as a function
+function output(txt) {
+	console.log( txt );
+}
+
+function printIf( predicate, msg ) {
+	if (predicate( msg )) {
+		output( msg );
+	}
+}
+
+function isShortEnough(str) {
+	return str.length <= 5;
+}
+
+var msg1 = "Hello";
+var msg2 = msg1 + " World";
+
+printIf( isShortEnough, msg1 );			// Hello
+printIf( isShortEnough, msg2 );
+```
+
+现在我们假设你想打印一个足够长的消息，换句话说，它是`!isShortEnough(..)`的。你在一开始可能会这么想：
+```JavaScript
+function isLongEnough(str) {
+	return !isShortEnough( str );
+}
+
+printIf( isLongEnough, msg1 );
+printIf( isLongEnough, msg2 );			// Hello World
+```
+太简单了……但是你使用了*points*！看到`str`是怎么被传递进去了的吗？在不重新实现对`str.length`检查的情况下，我们可以将这个代码重构为*point-free*风格的吗？
+
+我们来定义一个`not(..)`否定辅助器（在函数式的库中经常被引用作`complement(..)`）：
+```JavaScript
+function not(predicate) {
+	return function negated(...args){
+		return !predicate( ...args );
+	};
+}
+
+// or the ES6 => arrow form
+var not =
+	predicate =>
+		(...args) =>
+			!predicate( ...args );
+```
+
+然后，我们使用`not(..)`来替换定义没有*points*的`isLongEnough(..)`：
+```JavaScript
+var isLongEnough = not( isShortEnough );
+
+printIf( isLongEnough, msg2 );			// Hello World
+```
+看起来好多了，是吧？但我们还*能够*更进一步。`printIf(..)`函数自身实际上就可以被重构为*point-free*形式的了。
+
+我们可以用`when`方法来表达`if`条件部分：
+```JavaScript
+function when(predicate,fn) {
+	return function conditional(...args){
+		if (predicate( ...args )) {
+			return fn( ...args );
+		}
+	};
+}
+
+// or the ES6 => form
+var when =
+	(predicate,fn) =>
+		(...args) =>
+			predicate( ...args ) ? fn( ...args ) : undefined;
+```
+让我们用几个在前面章节中看到过的其他辅助方法混合`when(..)`，来实现*point-free*的`printIf(..)`：
+```JavaScript
+var printIf = uncurry( rightPartial( when, output ) );
+```
+我来解释一下我们做了什么：我们先把`output`函数使用右向部分应用，把它作为了第二个实参（`fn`）传递给了`when(..)`。这样的话，对我们而言就还剩下预期输入第一个参数（`predicate`）的函数，*这个*函数调用的时候会产生另一个函数，这个新函数的预期输入是消息字符串；*它*看起来像是这样：`fn(predicate)(str)`。
+
+多个（2个）函数的链式调用看起来就像是个可怕的柯里化函数一样，所以我们对这个结果使用`uncurry(..)`，把它变成一个单函数，这个单函数的预期输入是`str`和`predicate`这两个实参，它们和原始`printIf(predicate,str)`的签名相匹配。
+
+下面我们将整个示例放在了一起：
+```JavaScript
+function output(msg) {
+	console.log( msg );
+}
+
+function isShortEnough(str) {
+	return str.length <= 5;
+}
+
+var isLongEnough = not( isShortEnough );
+
+var printIf = uncurry( partialRight( when, output ) );
+
+var msg1 = "Hello";
+var msg2 = msg1 + " World";
+
+printIf( isShortEnough, msg1 );			// Hello
+printIf( isShortEnough, msg2 );
+
+printIf( isLongEnough, msg1 );
+printIf( isLongEnough, msg2 );			// Hello World
+```
+
+希望*point-free*风格的函数式编程练习能够变得更有意义。为了能让自己自然而然的思考这个问题，仍然是需要大量的练习。而且你仍然必须对*point-free*风格是否值得做出判断，它在多大程度上有助于你的代码的可读性。
+
+你怎么看？*points*或者是*no-points*？
+
+Note：想要更过的*point-free*风格代码的练习？基于函数组合的新知识，我们将会在第四章的*再谈Points*一节中重新探讨这个技术。
+
+# 总结
+部分应用是一种通过创建新函数（其中，某些实参被预置）来减少函数期望输入的实参数量的技术。
+
+柯里化是一种特殊形式的部分应用，其中计数值被减少到1，具有连续的函数调用链，每个调用都只会接受一个实参。一旦这些函数调用指定了所有实参，所有的输入实参会被收集起来，并执行原始函数。你也可以撤销一个柯里化。
+
+其他的像是`unary(..)`，`identity(..)`以及`constant(..)`这些重要操作，都是函数式编程中基本工具的一部分。
+
+*Point-free*是一种编程风格，可以消除不必要的形参（points）对实参的映射，目的是读者更容易阅读/理解代码。
