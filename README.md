@@ -1,8 +1,30 @@
 # JavaScript轻量级函数式编程
 
+## 译者前言
 个人翻译作品，原文仓库：[Functional-Light-JS](https://github.com/getify/Functional-Light-JS)。如果有翻译的不对的地方，欢迎指正。
 
-<img src="https://cloud.githubusercontent.com/assets/150330/18719908/644f7630-7ff7-11e6-92d9-4abc3cf2b4a9.png" border=0 vspace=20/>
+本仓库只是文档源文件仓库，并未调整排版，直接在`github`中浏览的话，排版是混乱的，想浏览文章请点击下面目录中的链接。
+
+## 中文版目录
+
+* 序言 (TBA)
+* [前言](preface.md)
+* [第一章: 为什么需要函数式编程？](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-01)
+* [第二章: 函数式函数的基础](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-02)
+* 第三章: 管理函数入口
+* 第四章: 编写函数
+* 第五章: 减少副作用
+* 第六章: 值的不变性
+* 第七章: 闭包与对象
+* 第八章: 排列操作
+* 第九章: 递归
+* 第十章: 函数式异步
+* 第十一章: 将之合而为一
+* 附录A: 转换
+* 附录B: The Humble Monad
+* 附录C: FP Libraries
+
+## 原版介绍
 
 　　这本书探讨了可以应用于JavaScript的函数式编程（FP）的核心原理。但是，这本书的不同之处在于，我们并不会直接拿一堆术语来淹没读者。在这里我们将会讲述函数式编程基础概念的一个子集，我称之为“轻量级函数式编程”（FLP），并且将之应用于Javascript之中。
 
@@ -15,27 +37,6 @@
 　　但是我希望你能够在JavaScript中应用一些函数式编程的基础，因为我相信它会帮助你写出更好更合理的代码来。
 
 　　**在读这本书之前，如果你想知道关于我写这本书更多的动机和观点，请看这里[前言](preface.md)。**
-
-## 中文版
-
-[目录](toc.md)
-
-* 序言 (TBA)
-* [前言](preface.md)
-* [第一章: 为什么需要函数式编程？](ch1.md)
-* [第二章: 函数式函数的基础](ch2.md)
-* [第三章: 管理函数入口](ch3.md)
-* 第四章: 编写函数
-* 第五章: 减少副作用
-* 第六章: 值的不变性
-* 第七章: 闭包与对象
-* 第八章: 排列操作
-* 第九章: 递归
-* 第十章: 函数式异步
-* 第十一章: 将之合而为一
-* 附录A: 转换
-* 附录B: The Humble Monad
-* 附录C: FP Libraries
 
 ## 英文原版
 
