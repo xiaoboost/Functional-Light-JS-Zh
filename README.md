@@ -1,9 +1,10 @@
 # JavaScript轻量级函数式编程
 
 ## 译者前言
-个人翻译作品，原文仓库：[Functional-Light-JS](https://github.com/getify/Functional-Light-JS)。如果有翻译的不对的地方，欢迎指正。
+　　个人翻译作品，原文仓库：[Functional-Light-JS](https://github.com/getify/Functional-Light-JS)。如果有翻译的不对的地方，欢迎指正。  
+　　本仓库只是文档源文件仓库，并未调整排版，在`github`中浏览的话排版是混乱的。
 
-本仓库只是文档源文件仓库，并未调整排版，直接在`github`中浏览的话，排版是混乱的，想浏览文章请点击下面目录中的链接。
+　　浏览文章请点击下面目录中的链接。
 
 ## 中文版目录
 
