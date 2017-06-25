@@ -13,7 +13,7 @@
 * [第一章: 为什么需要函数式编程？](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-01)
 * [第二章: 函数式函数的基础](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-02)
 * [第三章: 管理函数入口](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-03)
-* 第四章: 组合函数
+* [第四章: 组合函数](http://www.dreamingcat.me/#/post/functional-light-js-zh-ch-04)
 * 第五章: 减少副作用
 * 第六章: 值的不变性
 * 第七章: 闭包与对象
